@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Início - EPI Flow{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-body p-5 text-center">
+        <div class="mb-3 text-secondary display-5">
+            <i class="bi bi-cone-striped text-warning"></i>
+        </div>
+        <h3 class="fw-bold text-dark mb-2">Painel Inicial</h3>
+        <p class="text-muted fs-5 mb-3">Módulo em desenvolvimento</p>
+        <p class="text-secondary small mb-4">
+            Em breve este painel exibirá os indicadores, gráficos e controle de estoque de EPIs.
+        </p>
+        <a href="{% url 'colaboradores:listar' %}" class="btn btn-custom px-4 fw-bold shadow-sm">
+            <i class="bi bi-people me-2"></i>Acessar Colaboradores
+        </a>
+    </div>
+</div>
+{% endblock %}

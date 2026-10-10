@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Colaboradores - EPI Flow{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-bottom py-3">
+        <div class="row g-3 align-items-center justify-content-between">
+            <div class="col-12 col-md-4">
+                <h4 class="mb-0 fw-bold">
+                    <i class="bi bi-people-fill me-2 text-secondary"></i>Colaboradores
+                </h4>
+            </div>
+
+            <!-- Barra de Pesquisa por Nome (Wireframe) -->
+            <div class="col-12 col-md-5">
+                <form method="GET" class="d-flex gap-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                        <input type="text" name="busca" class="form-control" placeholder="Pesquisar pelo nome"
+                            value="{{ termo_busca }}">
+                    </div>
+                    <button type="submit" class="btn btn-outline-secondary">Buscar</button>
+                    {% if termo_busca %}
+                    <a href="{% url 'colaboradores:listar' %}" class="btn btn-outline-danger" title="Limpar busca">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Botão CRIAR (Wireframe) -->
+            <div class="col-12 col-md-3 text-md-end">
+                <a href="{% url 'colaboradores:cadastrar' %}" class="btn btn-custom fw-bold shadow-sm">
+                    <i class="bi bi-plus-lg me-1"></i>CRIAR
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        {% if colaboradores %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Nome</th>
+                        <th>Matrícula</th>
+                        <th>CPF</th>
+                        <th>Função</th>
+                        <th>Telefone</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for colab in colaboradores %}
+                    <tr class="{% if not colab.ativo %}table-light opacity-75{% endif %}">
+                        <td class="ps-4 fw-semibold text-dark">{{ colab.nome }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ colab.matricula }}</span></td>
+                        <td>{{ colab.cpf }}</td>
+                        <td>{{ colab.funcao }}</td>
+                        <td>{{ colab.telefone }}</td>
+                        <td>
+                            {% if colab.ativo %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">Ativo</span>
+                            {% else %}
+                            <span
+                                class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <!-- Botão de Inativar / Ativar -->
+                            <a href="{% url 'colaboradores:alternar_status' colab.id %}"
+                                class="btn btn-sm {% if colab.ativo %}btn-outline-warning text-dark{% else %}btn-outline-success{% endif %} me-1"
+                                title="{% if colab.ativo %}Inativar Colaborador{% else %}Ativar Colaborador{% endif %}">
+                                <i
+                                    class="bi {% if colab.ativo %}bi-person-slash{% else %}bi-person-check{% endif %} me-1"></i>
+                                {% if colab.ativo %}Inativar{% else %}Ativar{% endif %}
+                            </a>
+
+                            <!-- Botão de Editar -->
+                            <a href="{% url 'colaboradores:editar' colab.id %}"
+                                class="btn btn-sm btn-outline-primary me-1">
+                                <i class="bi bi-pencil-square me-1"></i>Editar
+                            </a>
+
+                            <!-- Botão de Deletar (Abre o Modal) -->
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                data-bs-target="#modalExcluir" data-colab-id="{{ colab.id }}"
+                                data-colab-nome="{{ colab.nome }}">
+                                <i class="bi bi-trash me-1"></i>Deletar
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- Mensagem de estado vazio (conforme o wireframe) -->
+        <div class="text-center py-5">
+            <div class="mb-3 text-muted display-4">
+                <i class="bi bi-search"></i>
+            </div>
+            <h5 class="text-muted fw-normal">
+                Desculpe, mas não encontramos dados correspondentes à sua busca :&#40;
+            </h5>
+            <p class="text-secondary small">Tente pesquisar por outro nome ou cadastre um novo colaborador.</p>
+            <a href="{% url 'colaboradores:cadastrar' %}" class="btn btn-custom btn-sm mt-2">
+                Cadastrar novo colaborador
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão (Wireframe: Remover Usuário) -->
+<div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="modalExcluirLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Remover Usuário
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4 text-center">
+                <p class="fs-5 mb-2">Você quer remover esse usuário?</p>
+                <p class="fw-bold fs-6 text-danger" id="nomeColaboradorModal"></p>
+                <p class="text-muted small mb-0">Essa ação não poderá ser desfeita no banco de dados.</p>
+            </div>
+            <div class="modal-footer justify-content-center bg-light border-0">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formExcluir" method="POST" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger px-4 fw-bold">Remover!</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Script para preencher os dados do colaborador no Modal de Exclusão
+    const modalExcluir = document.getElementById('modalExcluir');
+    if (modalExcluir) {
+        modalExcluir.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const colabId = button.getAttribute('data-colab-id');
+            const colabNome = button.getAttribute('data-colab-nome');
+
+            document.getElementById('nomeColaboradorModal').textContent = colabNome;
+            document.getElementById('formExcluir').action = `/colaboradores/${colabId}/excluir/`;
+        });
+    }
+</script>
+{% endblock %}

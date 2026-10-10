@@ -1,0 +1,112 @@
+/* Variáveis de Cores Corporativas (EPI Flow) */
+:root {
+    --primary-teal: #0f766e;
+    --primary-dark: #134e4a;
+    --sidebar-bg: #092020;
+    --sidebar-hover: #134e4a;
+}
+
+body {
+    background-color: #f1f5f9;
+    font-family: Arial, sans-serif;
+    color: #333;
+    margin: 0;
+    min-height: 100vh;
+}
+
+/* Layout Geral: Sidebar à esquerda + Conteúdo à direita */
+.app-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* Sidebar à esquerda */
+.sidebar {
+    width: 250px;
+    background: linear-gradient(180deg, var(--primary-dark) 0%, var(--sidebar-bg) 100%);
+    color: #e2e8f0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-brand {
+    padding: 1.5rem 1.25rem;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 1rem 0;
+    margin: 0;
+}
+
+.sidebar-category {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    padding: 0.75rem 1.25rem 0.25rem;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+}
+
+.sidebar-link i {
+    font-size: 1.15rem;
+    margin-right: 0.75rem;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+    background-color: var(--sidebar-hover);
+    color: #5eead4;
+    border-left: 4px solid #14b8a6;
+}
+
+/* Área de Conteúdo à direita */
+.content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.topbar {
+    background-color: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-content {
+    padding: 2rem;
+    flex: 1;
+}
+
+/* Botões do Sistema */
+.btn-custom {
+    background-color: var(--primary-teal);
+    color: white;
+}
+
+.btn-custom:hover {
+    background-color: var(--primary-dark);
+    color: white;
+}

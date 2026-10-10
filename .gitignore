@@ -1,6 +1,10 @@
 epi-flow-backup-completo/
+base-professor/
+wireframe.drawio
 __pycache__/
 *.py[cod]
+staticfiles/
 .venv/
 env/
 #db.sqlite3
+
