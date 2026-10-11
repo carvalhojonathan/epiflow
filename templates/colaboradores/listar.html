@@ -17,8 +17,8 @@
                 <form method="GET" class="d-flex gap-2">
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                        <input type="text" name="busca" class="form-control" placeholder="Pesquisar pelo nome"
-                            value="{{ termo_busca }}">
+                        <input type="text" name="busca" class="form-control"
+                            placeholder="Pesquisar por nome, CPF ou matrícula" value="{{ termo_busca }}">
                     </div>
                     <button type="submit" class="btn btn-outline-secondary">Buscar</button>
                     {% if termo_busca %}
