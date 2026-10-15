@@ -6,5 +6,5 @@ __pycache__/
 staticfiles/
 .venv/
 env/
-db.sqlite3
+#db.sqlite3
 
