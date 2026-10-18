@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'apps.nucleo',
     'apps.colaboradores',
+    'apps.epis',
 ]
 
 MIDDLEWARE = [

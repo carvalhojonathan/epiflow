@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - EPI Flow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold text-dark">
+                    <i class="fa-solid fa-helmet-safety me-2 text-secondary"></i>{{ titulo }}
+                </h4>
+                <a href="{% url 'epis:listar' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Ver Lista
+                </a>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    <!-- NOME DO EQUIPAMENTO -->
+                    <div class="mb-3">
+                        <label for="{{ form.nome.id_for_label }}" class="form-label fw-semibold">
+                            {{ form.nome.label }} *
+                        </label>
+                        {{ form.nome }}
+                        {% if form.nome.errors %}
+                        <div class="text-danger small mt-1">{{ form.nome.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- CA E VALIDADE -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.ca_numero.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.ca_numero.label }} *
+                            </label>
+                            {{ form.ca_numero }}
+                            {% if form.ca_numero.errors %}
+                            <div class="text-danger small mt-1">{{ form.ca_numero.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.validade_ca.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.validade_ca.label }} *
+                            </label>
+                            {{ form.validade_ca }}
+                            {% if form.validade_ca.errors %}
+                            <div class="text-danger small mt-1">{{ form.validade_ca.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- SALDO DE ESTOQUE E ESTOQUE MÍNIMO -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.saldo_estoque.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.saldo_estoque.label }}
+                            </label>
+                            {{ form.saldo_estoque }}
+                            {% if form.saldo_estoque.errors %}
+                            <div class="text-danger small mt-1">{{ form.saldo_estoque.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.estoque_minimo.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.estoque_minimo.label }}
+                            </label>
+                            {{ form.estoque_minimo }}
+                            {% if form.estoque_minimo.errors %}
+                            <div class="text-danger small mt-1">{{ form.estoque_minimo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- STATUS ATIVO -->
+                    <div class="form-check form-switch mb-4">
+                        {{ form.ativo }}
+                        <label class="form-check-label fw-semibold" for="{{ form.ativo.id_for_label }}">
+                            {{ form.ativo.label }}
+                        </label>
+                    </div>
+
+                    <!-- BOTÕES DE AÇÃO -->
+                    <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                        <a href="{% url 'epis:listar' %}" class="btn btn-light border px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-custom px-4 fw-bold shadow-sm">
+                            {{ botao_texto }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
