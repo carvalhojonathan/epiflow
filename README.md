@@ -1,81 +1,47 @@
 # 🛡️ EPI Flow — Sistema de Gestão de EPIs
 
-Projeto acadêmico de sistema para gerenciamento e empréstimo de Equipamentos de Proteção Individual (EPIs), desenvolvido em Python e Django.
+Sistema web para gestão e controle de entrega/empréstimo de Equipamentos de Proteção Individual (EPIs), desenvolvido em Python e Django.
 
 ---
 
-## 🚀 Funcionalidades Implementadas (Módulo Colaboradores)
+## 🚀 Principais Módulos
 
-- **Cadastro de Colaboradores:** Formulário completo com validação de campos obrigatórios e feedback visual (Bootstrap Alerts).
-- **Permanência de Tela:** Após o cadastro com sucesso, o sistema permanece na tela de cadastro pronto para um novo registro.
-- **Validações Avançadas:**
-  - Verificação de algoritmo matemático e unicidade de CPF.
-  - Matrícula com padrão obrigatório iniciado em `F` + 5 dígitos (ex: `F12345`).
-  - Máscaras de digitação em tempo real para CPF, Telefone e Matrícula.
-- **Listagem Dinâmica & Busca:** Tabela responsiva com busca integrada por **Nome**, **CPF** ou início de **Matrícula**.
-- **Edição Cadastral:** Formulário pré-carregado com os dados do colaborador existente para atualização.
-- **Inativação Lógica:** Alternância de status (*Ativo* / *Inativo*) preservando o histórico para auditoria e conformidade com a NR-06.
-- **Exclusão Segura:** Modal de confirmação do Bootstrap antes de remover registros definitivamente via requisição POST.
-- **Interface Moderna:** Sidebar vertical de navegação e componentes estilizados com Bootstrap 5.
+- **👥 Colaboradores:** Cadastro com validação dos dados, busca inteligente e inativação/exclusão com modal de confirmação.
+- **🪖 Equipamentos (EPIs):** Cadastro com número e validade de CA, estoque mínimo e busca inteligente.
+- **📋 Controle de EPI:** Registro de empréstimos e fornecimentos com busca por colaborador e EPI, alerta visual de CA vencido e dados dinâmicos de baixa (devolvido, danificado, perdido).
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 📌 Status
 
-- **Linguagem:** Python 3.13+
-- **Framework Web:** Django 6.1+
-- **Banco de Dados:** SQLite3 (nativo de desenvolvimento)
-- **Frontend:** HTML5, CSS3, JavaScript e Bootstrap 5
+- ⚠️ **Integração com Estoque:** O registro de empréstimos/fornecimentos ainda não realiza baixa automática no saldo de estoque dos equipamentos.
+- 📊 **Relatórios e Autenticação:** As telas de relatórios gerenciais e login de usuários serão desenvolvidas em atualizações futuras.
 
 ---
 
-## 📋 Como Executar o Projeto Localmente
+## 🛠️ Tecnologias
 
-Siga o passo a passo abaixo para rodar o projeto em sua máquina:
+Python 3.13 | Django 6.1 | SQLite3 | Bootstrap 5 | Tom Select
 
-### 1. Clonar o Repositório
+---
+
+## 📋 Como Executar
+
 ```bash
+# 1. Clone e acesse o repositório
 git clone https://github.com/carvalhojonathan/epiflow.git
 cd epiflow
-```
 
-### 2. Criar e Ativar o Ambiente Virtual (`.venv`)
-
-**No Windows (PowerShell):**
-```powershell
+# 2. Crie e ative o ambiente virtual
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
+.\.venv\Scripts\Activate.ps1  # Windows (Linux/Mac: source .venv/bin/activate)
 
-**No Windows (Prompt de Comando / CMD):**
-```cmd
-python -m venv .venv
-.venv\Scripts\activate.bat
-```
-
-**No Linux ou macOS:**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### 3. Instalar as Dependências
-Com o ambiente virtual ativado:
-```bash
+# 3. Instale dependências e aplique migrações
 pip install -r requirements.txt
-```
-
-### 4. Executar as Migrações do Banco de Dados
-Crie as tabelas do banco SQLite executando:
-```bash
 python manage.py migrate
-```
 
-### 5. Iniciar o Servidor de Desenvolvimento
-```bash
+# 4. Inicie o servidor
 python manage.py runserver
 ```
 
-Agora acesse no seu navegador:
-- 🏠 **Página Inicial:** [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
-- 👥 **Módulo Colaboradores:** [http://127.0.0.1:8000/colaboradores/](http://127.0.0.1:8000/colaboradores/)
+Acesse: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
