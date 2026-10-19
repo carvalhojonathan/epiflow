@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - EPI Flow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-clipboard-check me-2 text-secondary"></i>{{ titulo }}
+                </h4>
+                <a href="{% url 'emprestimos:listar' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Ver Lista
+                </a>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    <!-- COLABORADOR (Apenas Leitura) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">
+                            Colaborador <i class="bi bi-lock-fill text-muted small ms-1" title="Campo bloqueado"></i>
+                        </label>
+                        <input type="text" class="form-control bg-light" value="{{ emprestimo.colaborador.nome }}"
+                            readonly disabled>
+                    </div>
+
+                    <!-- EQUIPAMENTO (Apenas Leitura) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">
+                            Equipamento <i class="bi bi-lock-fill text-muted small ms-1" title="Campo bloqueado"></i>
+                        </label>
+                        <input type="text" class="form-control bg-light" value="{{ emprestimo.equipamento.nome }}"
+                            readonly disabled>
+                    </div>
+
+                    <!-- DATAS DE EMPRÉSTIMO E PREVISÃO (Apenas Leitura) -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary">
+                                Data do Empréstimo <i class="bi bi-lock-fill text-muted small ms-1"
+                                    title="Campo bloqueado"></i>
+                            </label>
+                            <input type="text" class="form-control bg-light"
+                                value="{{ emprestimo.data_emprestimo|date:'d/m/Y' }}" readonly disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary">
+                                Data Prevista de Devolução <i class="bi bi-lock-fill text-muted small ms-1"
+                                    title="Campo bloqueado"></i>
+                            </label>
+                            <input type="text" class="form-control bg-light"
+                                value="{% if emprestimo.data_devolucao_prevista %}{{ emprestimo.data_devolucao_prevista|date:'d/m/Y' }}{% else %}Não aplicável{% endif %}"
+                                readonly disabled>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- STATUS E DATA DEVOLUÇÃO NA MESMA LINHA (LADO A LADO) -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.status.label }} *
+                            </label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Data Devolução Real (Lado a lado com o Status) -->
+                        <div class="col-md-6" id="bloco-data-devolucao" style="display: none;">
+                            <label for="{{ form.data_devolucao_real.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.data_devolucao_real.label }} *
+                            </label>
+                            {{ form.data_devolucao_real }}
+                            {% if form.data_devolucao_real.errors %}
+                            <div class="text-danger small mt-1">{{ form.data_devolucao_real.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- CAMPO DE OBSERVAÇÃO (Condicional) -->
+                    <div class="mb-3" id="bloco-observacao" style="display: none;">
+                        <label for="{{ form.observacao.id_for_label }}" class="form-label fw-semibold">
+                            {{ form.observacao.label }}
+                        </label>
+                        {{ form.observacao }}
+                        {% if form.observacao.errors %}
+                        <div class="text-danger small mt-1">{{ form.observacao.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- BOTÕES -->
+                    <div class="d-flex justify-content-end gap-2 border-top pt-3 mt-4">
+                        <a href="{% url 'emprestimos:listar' %}" class="btn btn-light border px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-custom px-4 fw-bold shadow-sm">
+                            {{ botao_texto }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const statusSelect = document.getElementById('id_status');
+    const blocoDevolucao = document.getElementById('bloco-data-devolucao');
+    const blocoObservacao = document.getElementById('bloco-observacao');
+    const campoDataDevolucao = document.getElementById('id_data_devolucao_real');
+
+    function obterDataHoje() {
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        return `${ano}-${mes}-${dia}`;
+    }
+
+    function toggleBlocoDevolucao() {
+        const statusAtual = statusSelect.value;
+        const deveExibir = ['Devolvido', 'Danificado', 'Perdido'].includes(statusAtual);
+
+        if (deveExibir) {
+            blocoDevolucao.style.display = 'block';
+            blocoObservacao.style.display = 'block';
+            // Se o campo estiver vazio, preenche com a data atual
+            if (!campoDataDevolucao.value) {
+                campoDataDevolucao.value = obterDataHoje();
+            }
+        } else {
+            blocoDevolucao.style.display = 'none';
+            blocoObservacao.style.display = 'none';
+        }
+    }
+
+    statusSelect.addEventListener('change', toggleBlocoDevolucao);
+    toggleBlocoDevolucao(); // Executa ao abrir a página
+</script>
+{% endblock %}

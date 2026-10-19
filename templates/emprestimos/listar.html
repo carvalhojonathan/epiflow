@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}Controle de EPI - EPI Flow{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-bottom py-3">
+        <div class="row g-3 align-items-center justify-content-between">
+            <div class="col-12 col-md-4">
+                <h4 class="mb-0 fw-bold">
+                    <i class="bi bi-clipboard-check me-2 text-secondary"></i>Controle de EPI
+                </h4>
+            </div>
+
+            <!-- Busca -->
+            <div class="col-12 col-md-5">
+                <form method="GET" class="d-flex gap-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                        <input type="text" name="busca" class="form-control"
+                            placeholder="Pesquisar por colaborador ou equipamento" value="{{ termo_busca }}">
+                    </div>
+                    <button type="submit" class="btn btn-outline-secondary">Buscar</button>
+                    {% if termo_busca %}
+                    <a href="{% url 'emprestimos:listar' %}" class="btn btn-outline-danger" title="Limpar busca">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Botão REGISTRAR -->
+            <div class="col-12 col-md-3 text-md-end">
+                <a href="{% url 'emprestimos:cadastrar' %}" class="btn btn-custom fw-bold shadow-sm">
+                    <i class="bi bi-plus-lg me-1"></i>REGISTRAR
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        {% if emprestimos %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Colaborador</th>
+                        <th>Equipamento</th>
+                        <th>Data Empréstimo</th>
+                        <th>Devolução Prevista</th>
+                        <th>Devolução Real</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in emprestimos %}
+                    <tr>
+                        <td class="ps-4 fw-semibold text-dark">{{ emp.colaborador.nome }}</td>
+                        <td>{{ emp.equipamento.nome }}</td>
+                        <td>{{ emp.data_emprestimo|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if emp.data_devolucao_prevista %}
+                            {{ emp.data_devolucao_prevista|date:"d/m/Y" }}
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if emp.data_devolucao_real %}
+                            {{ emp.data_devolucao_real|date:"d/m/Y" }}
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if emp.status == 'Emprestado' %}
+                            <span class="badge bg-warning text-dark border border-warning-subtle">Emprestado</span>
+                            {% elif emp.status == 'Fornecido' %}
+                            <span class="badge bg-info text-dark border border-info-subtle">Fornecido</span>
+                            {% elif emp.status == 'Devolvido' %}
+                            <span
+                                class="badge bg-success-subtle text-success border border-success-subtle">Devolvido</span>
+                            {% elif emp.status == 'Danificado' %}
+                            <span
+                                class="badge bg-danger-subtle text-danger border border-danger-subtle">Danificado</span>
+                            {% elif emp.status == 'Perdido' %}
+                            <span class="badge bg-dark text-white">Perdido</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <!-- Botão Editar -->
+                            <a href="{% url 'emprestimos:editar' emp.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                <i class="bi bi-pencil-square me-1"></i>Editar
+                            </a>
+
+                            <!-- Botão Deletar (Abre Modal) -->
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                data-bs-target="#modalExcluir" data-emp-id="{{ emp.id }}"
+                                data-emp-desc="{{ emp.equipamento.nome }} para {{ emp.colaborador.nome }}">
+                                <i class="bi bi-trash me-1"></i>Deletar
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- Estado Vazio -->
+        <div class="text-center py-5">
+            <div class="mb-3 text-muted display-4">
+                <i class="bi bi-clipboard-x"></i>
+            </div>
+            <h5 class="text-muted fw-normal">
+                {% if termo_busca %}
+                Nenhum empréstimo encontrado para "{{ termo_busca }}" :(
+                {% else %}
+                Nenhum empréstimo de EPI registrado ainda.
+                {% endif %}
+            </h5>
+            <p class="text-secondary small">Registre o primeiro empréstimo ou fornecimento de EPI.</p>
+            <a href="{% url 'emprestimos:cadastrar' %}" class="btn btn-custom btn-sm mt-2">
+                Registrar Empréstimo
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="modalExcluirLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Remover Registro de Empréstimo
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4 text-center">
+                <p class="fs-5 mb-2">Você deseja remover esse registro de empréstimo?</p>
+                <p class="fw-bold fs-6 text-danger" id="descEmprestimoModal"></p>
+                <p class="text-muted small mb-0">Essa ação não poderá ser desfeita.</p>
+            </div>
+            <div class="modal-footer justify-content-center bg-light border-0">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formExcluir" method="POST" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger px-4 fw-bold">Remover!</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Preenche o Modal com o ID e descrição do empréstimo selecionado
+    const modalExcluir = document.getElementById('modalExcluir');
+    if (modalExcluir) {
+        modalExcluir.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const empId = button.getAttribute('data-emp-id');
+            const empDesc = button.getAttribute('data-emp-desc');
+
+            document.getElementById('descEmprestimoModal').textContent = empDesc;
+            document.getElementById('formExcluir').action = `/emprestimos/${empId}/excluir/`;
+        });
+    }
+</script>
+{% endblock %}

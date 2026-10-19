@@ -48,6 +48,13 @@
                         <i class="fa-solid fa-helmet-safety"></i>Equipamentos
                     </a>
                 </li>
+                <li class="sidebar-category">Controle</li>
+                <li>
+                    <a href="{% url 'emprestimos:listar' %}"
+                        class="sidebar-link {% if request.resolver_match.app_name == 'emprestimos' %}active{% endif %}">
+                        <i class="bi bi-clipboard-check"></i>Controle de EPI
+                    </a>
+                </li>
             </ul>
         </aside>
 

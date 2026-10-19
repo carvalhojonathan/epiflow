@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - EPI Flow{% endblock %}
+
+{% block content %}
+<!-- Tom Select CSS para a busca digitável -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style>
+    .ts-control {
+        border-radius: 0.375rem !important;
+        padding: 0.55rem 0.75rem !important;
+        border-color: #dee2e6 !important;
+        font-size: 0.95rem;
+    }
+
+    .ts-dropdown {
+        border-radius: 0.375rem !important;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-clipboard-check me-2 text-secondary"></i>{{ titulo }}
+                </h4>
+                <a href="{% url 'emprestimos:listar' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Ver Lista
+                </a>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" id="formEmprestimo" novalidate>
+                    {% csrf_token %}
+
+                    <!-- 1. COLABORADOR (COM BUSCA EM ORDEM ALFABÉTICA) -->
+                    <div class="mb-3">
+                        <label for="{{ form.colaborador.id_for_label }}" class="form-label fw-semibold">
+                            {{ form.colaborador.label }} *
+                        </label>
+                        {{ form.colaborador }}
+                        {% if form.colaborador.errors %}
+                        <div class="text-danger small mt-1">{{ form.colaborador.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- 2. EQUIPAMENTO (COM BUSCA EM ORDEM ALFABÉTICA) -->
+                    <div class="mb-3">
+                        <label for="{{ form.equipamento.id_for_label }}" class="form-label fw-semibold">
+                            {{ form.equipamento.label }} *
+                        </label>
+                        {{ form.equipamento }}
+                        {% if form.equipamento.errors %}
+                        <div class="text-danger small mt-1">{{ form.equipamento.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- 3. STATUS (SELECT - VEM ANTES DAS DATAS CONFORME REGRA) -->
+                    <div class="mb-3">
+                        <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
+                            {{ form.status.label }} *
+                        </label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                        <div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- 4. DATAS DE EMPRÉSTIMO E DEVOLUÇÃO PREVISTA -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.data_emprestimo.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.data_emprestimo.label }} *
+                            </label>
+                            {{ form.data_emprestimo }}
+                            {% if form.data_emprestimo.errors %}
+                            <div class="text-danger small mt-1">{{ form.data_emprestimo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Data Prevista (Desativa se Fornecido) -->
+                        <div class="col-md-6" id="bloco-data-prevista">
+                            <label for="{{ form.data_devolucao_prevista.id_for_label }}" class="form-label fw-semibold"
+                                id="label-data-prevista">
+                                {{ form.data_devolucao_prevista.label }} *
+                            </label>
+                            {{ form.data_devolucao_prevista }}
+                            {% if form.data_devolucao_prevista.errors %}
+                            <div class="text-danger small mt-1">{{ form.data_devolucao_prevista.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- BOTÕES -->
+                    <div class="d-flex justify-content-end gap-2 border-top pt-3 mt-4">
+                        <a href="{% url 'emprestimos:listar' %}" class="btn btn-light border px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-custom px-4 fw-bold shadow-sm">
+                            {{ botao_texto }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Tom Select JS para busca em tempo real com ordenação alfabética -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script>
+    // Inicialização com Busca Inteligente por Nome ou Matrícula (com F ou sem F)
+    const tsColaborador = new TomSelect("#{{ form.colaborador.id_for_label }}", {
+        create: false,
+        placeholder: "Digite o nome ou matrícula...",
+        sortField: { field: "text", direction: "asc" },
+        score: function (search) {
+            search = search.toLowerCase().trim();
+            if (!search) return function () { return 0; };
+
+            const searchSemF = search.startsWith('f') ? search.slice(1) : search;
+            const searchComF = search.startsWith('f') ? search : 'f' + search;
+            const apenasNumeros = searchSemF.replace(/^0+/, ''); // Remove zeros à esquerda (ex: 42)
+
+            return function (item) {
+                const text = item.text.toLowerCase();
+                // 1. Busca direta pelo texto (nome ou matrícula completa)
+                if (text.includes(search) || text.includes(searchSemF) || text.includes(searchComF)) {
+                    return 1;
+                }
+                // 2. Busca pelo número sem zeros (ex: digitou 42 e a matrícula é F00042)
+                if (apenasNumeros && text.includes(apenasNumeros)) {
+                    return 1;
+                }
+                return 0;
+            };
+        }
+    });
+    if (!tsColaborador.getValue()) {
+        tsColaborador.clear(true);
+    }
+
+    const tsEquipamento = new TomSelect("#{{ form.equipamento.id_for_label }}", {
+        create: false,
+        placeholder: "Digite o nome ou nº do CA...",
+        sortField: { field: "text", direction: "asc" },
+    });
+    if (!tsEquipamento.getValue()) {
+        tsEquipamento.clear(true);
+    }
+
+    // Desativa a data prevista se o status selecionado for Fornecido
+    const selectStatus = document.getElementById('{{ form.status.id_for_label }}');
+    const campoDataPrevista = document.getElementById('{{ form.data_devolucao_prevista.id_for_label }}');
+    const labelDataPrevista = document.getElementById('label-data-prevista');
+
+    function alternarDataPrevista() {
+        if (selectStatus.value === 'Fornecido') {
+            campoDataPrevista.value = '';
+            campoDataPrevista.disabled = true;
+            campoDataPrevista.classList.add('bg-light');
+            labelDataPrevista.innerHTML = 'Data Prevista de Devolução <span class="text-muted fw-normal">(Não aplicável)</span>';
+        } else {
+            campoDataPrevista.disabled = false;
+            campoDataPrevista.classList.remove('bg-light');
+            labelDataPrevista.innerHTML = 'Data Prevista de Devolução *';
+        }
+    }
+
+    selectStatus.addEventListener('change', alternarDataPrevista);
+    alternarDataPrevista();
+</script>
+{% endblock %}
