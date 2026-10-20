@@ -18,7 +18,7 @@
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
                         <input type="text" name="busca" class="form-control"
-                            placeholder="Pesquisar por colaborador ou equipamento" value="{{ termo_busca }}">
+                            placeholder="Pesquisar por colaborador, EPI ou status" value="{{ termo_busca }}">
                     </div>
                     <button type="submit" class="btn btn-outline-secondary">Buscar</button>
                     {% if termo_busca %}
@@ -119,7 +119,7 @@
                 Nenhum empréstimo de EPI registrado ainda.
                 {% endif %}
             </h5>
-            <p class="text-secondary small">Registre o primeiro empréstimo ou fornecimento de EPI.</p>
+            <p class="text-secondary small">Registre um empréstimo ou fornecimento de EPI.</p>
             <a href="{% url 'emprestimos:cadastrar' %}" class="btn btn-custom btn-sm mt-2">
                 Registrar Empréstimo
             </a>

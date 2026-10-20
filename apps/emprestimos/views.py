@@ -40,21 +40,22 @@ def cadastrar_emprestimo(request):
 
 def listar_emprestimos(request):
     """
-    Lista todos os empréstimos com suporte a busca por colaborador ou equipamento.
+    Lista todos os empréstimos com suporte a busca por colaborador, equipamento ou status.
     """
     termo_busca = request.GET.get('busca', '').strip()
     todos = Emprestimo.objects.select_related('colaborador', 'equipamento').all()
-
     if termo_busca:
         termo_normalizado = remover_acentos(termo_busca)
         emprestimos = [
             e for e in todos
             if termo_normalizado in remover_acentos(e.colaborador.nome)
+            or termo_normalizado in remover_acentos(e.colaborador.matricula)
             or termo_normalizado in remover_acentos(e.equipamento.nome)
+            or termo_normalizado in remover_acentos(e.equipamento.ca_numero)
+            or termo_normalizado in remover_acentos(e.status)  # <-- Busca pelo Status
         ]
     else:
         emprestimos = todos
-
     return render(request, 'emprestimos/listar.html', {
         'emprestimos': emprestimos,
         'termo_busca': termo_busca,
