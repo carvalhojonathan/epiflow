@@ -6,9 +6,9 @@ Sistema web para gestão e controle de entrega/empréstimo de Equipamentos de Pr
 
 ## 🚀 Principais Módulos
 
-- **👥 Colaboradores:** Cadastro com validação dos dados, busca inteligente e inativação/exclusão com modal de confirmação.
-- **🪖 Equipamentos (EPIs):** Cadastro com número e validade de CA, estoque mínimo e busca inteligente.
-- **📋 Controle de EPI:** Registro de empréstimos e fornecimentos com busca por colaborador e EPI, alerta visual de CA vencido e dados dinâmicos de baixa (devolvido, danificado, perdido).
+- **👥 Colaboradores:** Cadastro de colaboradores com validação de dados, busca inteligente e inativação/exclusão com modal de confirmação.
+- **🪖 Equipamentos (EPIs):** Cadastro de EPIs com número e validade de CA, estoque mínimo, validação de dados e busca inteligente.
+- **📋 Controle de EPI:** Registro de empréstimos e fornecimentos com busca por colaborador e EPI, atualização de status, alerta visual de CA vencido e dados dinâmicos de baixa (devolvido, danificado, perdido).
 
 ---
 
