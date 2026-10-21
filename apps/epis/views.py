@@ -17,7 +17,7 @@ def cadastrar_equipamento(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Equipamento cadastrado com sucesso!')
-            # Permanece na tela de cadastro limpa conforme requisito
+            # Permanece na tela de cadastro limpa
             return redirect('epis:cadastrar')
         else:
             messages.error(request, 'Equipamento não foi cadastrado! Verifique os campos.')

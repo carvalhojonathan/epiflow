@@ -33,7 +33,7 @@ def cadastrar_emprestimo(request):
 
     return render(request, 'emprestimos/cadastrar.html', {
         'form': form,
-        'titulo': 'Registrar Empréstimo de EPI',
+        'titulo': 'Controle de EPI',
         'botao_texto': 'SALVAR',
     })
 

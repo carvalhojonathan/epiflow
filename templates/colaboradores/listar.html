@@ -12,7 +12,7 @@
                 </h4>
             </div>
 
-            <!-- Barra de Pesquisa por Nome (Wireframe) -->
+            <!-- Barra de Pesquisa por Nome -->
             <div class="col-12 col-md-5">
                 <form method="GET" class="d-flex gap-2">
                     <div class="input-group">
@@ -29,7 +29,7 @@
                 </form>
             </div>
 
-            <!-- Botão CRIAR (Wireframe) -->
+            <!-- Botão CRIAR -->
             <div class="col-12 col-md-3 text-md-end">
                 <a href="{% url 'colaboradores:cadastrar' %}" class="btn btn-custom fw-bold shadow-sm">
                     <i class="bi bi-plus-lg me-1"></i>CRIAR
@@ -85,7 +85,7 @@
                                 <i class="bi bi-pencil-square me-1"></i>Editar
                             </a>
 
-                            <!-- Botão de Deletar (Abre o Modal) -->
+                            <!-- Botão de Deletar -->
                             <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
                                 data-bs-target="#modalExcluir" data-colab-id="{{ colab.id }}"
                                 data-colab-nome="{{ colab.nome }}">
@@ -98,7 +98,7 @@
             </table>
         </div>
         {% else %}
-        <!-- Mensagem de estado vazio (conforme o wireframe) -->
+        <!-- Mensagem de estado vazio -->
         <div class="text-center py-5">
             <div class="mb-3 text-muted display-4">
                 <i class="bi bi-search"></i>
@@ -115,7 +115,7 @@
     </div>
 </div>
 
-<!-- Modal de Confirmação de Exclusão (Wireframe: Remover Usuário) -->
+<!-- Modal de Confirmação de Exclusão (Remover Usuário) -->
 <div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
