@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 
 class Equipamento(models.Model):
     nome = models.CharField(max_length=100)
@@ -13,4 +12,10 @@ class Equipamento(models.Model):
     def __str__(self):
         return self.nome
 
-    
+    @property
+    def ca_vencido(self):
+        """Retorna True se o CA já expirou em relação à data atual."""
+        from django.utils import timezone
+        if self.validade_ca:
+            return self.validade_ca < timezone.now().date()
+        return False

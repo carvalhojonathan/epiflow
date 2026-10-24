@@ -1,0 +1,555 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Relatório de Empréstimos - EPI Flow{% endblock %}
+
+{% block content %}
+<!-- TÍTULO DA PÁGINA E BOTÃO DE AÇÃO -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1 text-dark">
+            <i class="bi bi-file-earmark-bar-graph me-2 text-secondary"></i>Relatório de Controle de EPI
+        </h3>
+        <p class="text-secondary small mb-0">Consulte, filtre e exporte os registros de empréstimos e fornecimentos.</p>
+    </div>
+
+    <!-- BOTÃO SALVAR RELATÓRIO (Fundo claro -> Hover Teal) -->
+    {% if total_registros > 0 %}
+    <button type="button" class="btn btn-salvar-relatorio shadow-sm d-flex align-items-center gap-2 px-3 py-2 rounded-2"
+        id="btnSalvarPDF" onclick="gerarPDFRelatorio()" title="Salvar relatório estilizado em PDF">
+        <i class="bi bi-file-earmark-pdf fs-5"></i>
+        <span>Salvar Relatório</span>
+    </button>
+    {% endif %}
+</div>
+
+<!-- CARD DE FILTROS CUMULATIVOS (AND) COM TOM SELECT -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+        <form method="GET" class="row g-3">
+            <!-- Preserva a ordenação atual ao filtrar -->
+            <input type="hidden" name="campo" value="{{ campo_ordenacao }}">
+            <input type="hidden" name="direcao" value="{{ direcao_ordenacao }}">
+
+            <!-- 1. Colaborador (Select com Busca Inteligente) -->
+            <div class="col-12 col-md-4">
+                <label for="filtro-colaborador" class="form-label fw-semibold small text-secondary">Colaborador</label>
+                <select id="filtro-colaborador" name="colaborador" class="form-select">
+                    <option value="">Todos os colaboradores</option>
+                    {% for colab in colaboradores %}
+                    {% if colaborador_busca == colab.id|stringformat:"s" %}
+                    <option value="{{ colab.id }}" selected>
+                        {{ colab.nome }}{% if colab.matricula %} ({{ colab.matricula }}){% endif %}
+                    </option>
+                    {% else %}
+                    <option value="{{ colab.id }}">
+                        {{ colab.nome }}{% if colab.matricula %} ({{ colab.matricula }}){% endif %}
+                    </option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- 2. Equipamento (Select com Busca Inteligente) -->
+            <div class="col-12 col-md-4">
+                <label for="filtro-equipamento" class="form-label fw-semibold small text-secondary">Equipamento
+                    (EPI)</label>
+                <select id="filtro-equipamento" name="equipamento" class="form-select">
+                    <option value="">Todos os equipamentos</option>
+                    {% for equip in equipamentos %}
+                    {% if equipamento_busca == equip.id|stringformat:"s" %}
+                    <option value="{{ equip.id }}" selected>
+                        {{ equip.nome }}{% if equip.ca_numero %} (CA: {{ equip.ca_numero }}){% endif %}
+                    </option>
+                    {% else %}
+                    <option value="{{ equip.id }}">
+                        {{ equip.nome }}{% if equip.ca_numero %} (CA: {{ equip.ca_numero }}){% endif %}
+                    </option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- 3. Status -->
+            <div class="col-12 col-md-2">
+                <label for="campo-status" class="form-label fw-semibold small text-secondary">Status</label>
+                <select id="campo-status" name="status" class="form-select">
+                    <option value="">Todos os status</option>
+                    {% for status_cod, status_label in status_opcoes %}
+                    {% if status_busca == status_cod %}
+                    <option value="{{ status_cod }}" selected>{{ status_label }}</option>
+                    {% else %}
+                    <option value="{{ status_cod }}">{{ status_label }}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- 4. Botões Filtrar e Limpar -->
+            <div class="col-12 col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-custom w-100 fw-bold">
+                    <i class="bi bi-funnel me-1"></i>Filtrar
+                </button>
+                {% if colaborador_busca or equipamento_busca or status_busca %}
+                <a href="{% url 'emprestimos:relatorios' %}" class="btn btn-outline-danger"
+                    title="Limpar todos os filtros">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- TABELA DE RESULTADOS NA TELA -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-table me-2 text-secondary"></i>Registros Encontrados
+        </h5>
+        <span class="badge bg-light text-dark border px-3 py-2">
+            <strong>{{ total_registros }}</strong> registro{{ total_registros|pluralize:"s" }}
+        </span>
+    </div>
+
+    <div class="card-body p-0">
+        {% if emprestimos %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <!-- 1. Colaborador -->
+                        <th class="ps-4">
+                            <a href="?colaborador={{ colaborador_busca }}&equipamento={{ equipamento_busca }}&status={{ status_busca }}&campo=colaborador&direcao={% if campo_ordenacao == 'colaborador' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Colaborador">
+                                <span>Colaborador</span>
+                                {% if campo_ordenacao == 'colaborador' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente (A-Z)"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente (Z-A)"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 2. Equipamento -->
+                        <th>
+                            <a href="?colaborador={{ colaborador_busca }}&equipamento={{ equipamento_busca }}&status={{ status_busca }}&campo=equipamento&direcao={% if campo_ordenacao == 'equipamento' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Equipamento">
+                                <span>Equipamento</span>
+                                {% if campo_ordenacao == 'equipamento' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente (A-Z)"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente (Z-A)"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 3. Data Empréstimo -->
+                        <th>
+                            <a href="?colaborador={{ colaborador_busca }}&equipamento={{ equipamento_busca }}&status={{ status_busca }}&campo=data_emprestimo&direcao={% if campo_ordenacao == 'data_emprestimo' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Data de Empréstimo">
+                                <span>Data Empréstimo</span>
+                                {% if campo_ordenacao == 'data_emprestimo' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Mais antigos primeiro"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Mais recentes primeiro"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 4. Devolução Prevista -->
+                        <th>
+                            <a href="?colaborador={{ colaborador_busca }}&equipamento={{ equipamento_busca }}&status={{ status_busca }}&campo=devolucao_prevista&direcao={% if campo_ordenacao == 'devolucao_prevista' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Devolução Prevista">
+                                <span>Devolução Prevista</span>
+                                {% if campo_ordenacao == 'devolucao_prevista' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Mais antigas primeiro"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Mais recentes primeiro"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 5. Devolução Real -->
+                        <th>
+                            <a href="?colaborador={{ colaborador_busca }}&equipamento={{ equipamento_busca }}&status={{ status_busca }}&campo=devolucao_real&direcao={% if campo_ordenacao == 'devolucao_real' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Devolução Real">
+                                <span>Devolução Real</span>
+                                {% if campo_ordenacao == 'devolucao_real' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Mais antigos primeiro"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Mais recentes primeiro"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 6. Status -->
+                        <th>
+                            <a href="?colaborador={{ colaborador_busca }}&equipamento={{ equipamento_busca }}&status={{ status_busca }}&campo=status&direcao={% if campo_ordenacao == 'status' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Status">
+                                <span>Status</span>
+                                {% if campo_ordenacao == 'status' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente (A-Z)"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente (Z-A)"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 7. Observação (Sem setinha) -->
+                        <th>Observação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in emprestimos %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-semibold text-dark">{{ emp.colaborador.nome }}</div>
+                            {% if emp.colaborador.matricula %}
+                            <span class="badge bg-light text-secondary border">
+                                {{ emp.colaborador.matricula }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark">{{ emp.equipamento.nome }}</div>
+                            {% if emp.equipamento.ca_numero %}
+                            <span class="badge bg-light text-secondary border">
+                                {{ emp.equipamento.ca_numero }}
+                            </span>
+                            {% endif %}
+
+                            <!-- ALERTA DE CA VENCIDO DURANTE O USO -->
+                            {% if emp.ca_vencido_em_uso %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1"
+                                title="O CA deste EPI venceu em {{ emp.equipamento.validade_ca|date:'d/m/Y' }} durante o uso">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>CA Vencido
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>{{ emp.data_emprestimo|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if emp.data_devolucao_prevista %}
+                            {{ emp.data_devolucao_prevista|date:"d/m/Y" }}
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if emp.data_devolucao_real %}
+                            {{ emp.data_devolucao_real|date:"d/m/Y" }}
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if emp.status == 'Emprestado' %}
+                            <span class="badge bg-warning text-dark border border-warning-subtle">Emprestado</span>
+                            {% elif emp.status == 'Fornecido' %}
+                            <span class="badge bg-info text-dark border border-info-subtle">Fornecido</span>
+                            {% elif emp.status == 'Devolvido' %}
+                            <span
+                                class="badge bg-success-subtle text-success border border-success-subtle">Devolvido</span>
+                            {% elif emp.status == 'Danificado' %}
+                            <span
+                                class="badge bg-danger-subtle text-danger border border-danger-subtle">Danificado</span>
+                            {% elif emp.status == 'Perdido' %}
+                            <span class="badge bg-dark text-white border border-dark">Perdido</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if emp.observacao %}
+                            <span class="small text-muted" title="{{ emp.observacao }}">{{
+                                emp.observacao|truncatechars:35 }}</span>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- ESTADO VAZIO -->
+        <div class="text-center py-5">
+            <div class="mb-3 text-muted display-4">
+                <i class="bi bi-search"></i>
+            </div>
+            <h5 class="text-muted fw-normal">Nenhum registro encontrado</h5>
+            <p class="text-secondary small">Tente ajustar ou limpar os filtros para visualizar os dados.</p>
+            <a href="{% url 'emprestimos:relatorios' %}" class="btn btn-outline-secondary btn-sm mt-2">
+                Limpar filtros
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- ELEMENTO MODELO PARA CAPTURA DO PDF (Oculto na tela: display: none) -->
+<!-- ================================================================= -->
+<div id="area-relatorio-pdf"
+    style="display: none; width: 1000px; background-color: #ffffff; color: #1e293b; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+
+    <!-- CABEÇALHO DO RELATÓRIO PDF (Fundo Teal Escuro #134e4a) -->
+    <div
+        style="background-color: #134e4a !important; color: #ffffff !important; padding: 20px 24px; border-radius: 6px 6px 0 0; margin-bottom: 20px;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <!-- LOGO E IDENTIFICAÇÃO -->
+                <td style="vertical-align: middle; width: 60%;">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        {% if logo_base64 %}
+                        <img src="{{ logo_base64 }}" alt="EPI Flow Logo"
+                            style="height: 48px; width: auto; object-fit: contain;">
+                        {% endif %}
+                        <div>
+                            <div style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; color: #ffffff;">
+                                EPI Flow
+                            </div>
+                            <div style="font-size: 0.85rem; color: #99f6e4; font-weight: 500;">
+                                Relatório Gerencial de Controle de EPI
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <!-- METADADOS DE EMISSÃO -->
+                <td style="vertical-align: middle; text-align: right; width: 40%; color: #ccfbf1; font-size: 0.8rem;">
+                    <div><strong>Data de Emissão:</strong> {% now "d/m/Y H:i" %}</div>
+                    <div><strong>Total de Registros:</strong> {{ total_registros }} registro(s)</div>
+                    <div>
+                        <strong>Filtros:</strong>
+                        {% if colaborador_nome_selecionado or equipamento_nome_selecionado or status_busca %}
+                        {% if colaborador_nome_selecionado %}Colab: {{ colaborador_nome_selecionado }} {% endif %}
+                        {% if equipamento_nome_selecionado %}EPI: {{ equipamento_nome_selecionado }} {% endif %}
+                        {% if status_busca %}Status: {{ status_busca }}{% endif %}
+                        {% else %}
+                        Nenhum (Geral)
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- TABELA ESTILIZADA PARA PDF COM LARGURAS FIXAS E TOTALMENTE AJUSTADA -->
+    <table
+        style="width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 24px;">
+        <thead>
+            <tr style="text-align: left;">
+                <th
+                    style="background-color: #134e4a !important; color: #ffffff !important; width: 22%; padding: 10px 14px; font-size: 0.8rem;">
+                    COLABORADOR</th>
+                <th
+                    style="background-color: #134e4a !important; color: #ffffff !important; width: 20%; padding: 10px 10px; font-size: 0.8rem;">
+                    EQUIPAMENTO</th>
+                <th
+                    style="background-color: #134e4a !important; color: #ffffff !important; width: 11%; padding: 10px 10px; font-size: 0.8rem;">
+                    EMPRÉSTIMO</th>
+                <th
+                    style="background-color: #134e4a !important; color: #ffffff !important; width: 11%; padding: 10px 10px; font-size: 0.8rem;">
+                    PREV. DEV.</th>
+                <th
+                    style="background-color: #134e4a !important; color: #ffffff !important; width: 11%; padding: 10px 10px; font-size: 0.8rem;">
+                    DEVOLUÇÃO</th>
+                <th
+                    style="background-color: #134e4a !important; color: #ffffff !important; width: 11%; padding: 10px 10px; font-size: 0.8rem;">
+                    STATUS</th>
+                <th
+                    style="background-color: #134e4a !important; color: #ffffff !important; width: 14%; padding: 10px 14px; font-size: 0.8rem;">
+                    OBSERVAÇÃO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in emprestimos %}
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 9px 14px; word-break: break-word;">
+                    <div class="fw-semibold text-dark">{{ emp.colaborador.nome }}</div>
+                    {% if emp.colaborador.matricula %}
+                    <span class="badge bg-light text-secondary border">
+                        {{ emp.colaborador.matricula }}
+                    </span>
+                    {% endif %}
+                </td>
+                <td style="padding: 9px 10px; word-break: break-word;">
+                    <div class="fw-semibold text-dark">{{ emp.equipamento.nome }}</div>
+                    {% if emp.equipamento.ca_numero %}
+                    <span class="badge bg-light text-secondary border">
+                        {{ emp.equipamento.ca_numero }}
+                    </span>
+                    {% endif %}
+                    {% if emp.ca_vencido_em_uso %}
+                    <span class="badge bg-danger text-white border" style="font-size: 0.68rem; padding: 2px 5px;"
+                        title="O CA deste EPI venceu durante o uso">
+                        CA Vencido
+                    </span>
+                    {% endif %}
+                </td>
+                <td style="padding: 9px 10px;">{{ emp.data_emprestimo|date:"d/m/Y" }}</td>
+                <td style="padding: 9px 10px;">
+                    {% if emp.data_devolucao_prevista %}
+                    {{ emp.data_devolucao_prevista|date:"d/m/Y" }}
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td style="padding: 9px 10px;">
+                    {% if emp.data_devolucao_real %}
+                    {{ emp.data_devolucao_real|date:"d/m/Y" }}
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td style="padding: 9px 10px;">
+                    {% if emp.status == 'Emprestado' %}
+                    <span class="badge bg-warning text-dark border">Emprestado</span>
+                    {% elif emp.status == 'Fornecido' %}
+                    <span class="badge bg-info text-dark border">Fornecido</span>
+                    {% elif emp.status == 'Devolvido' %}
+                    <span class="badge bg-success-subtle text-success border">Devolvido</span>
+                    {% elif emp.status == 'Danificado' %}
+                    <span class="badge bg-danger-subtle text-danger border">Danificado</span>
+                    {% elif emp.status == 'Perdido' %}
+                    <span class="badge bg-dark text-white">Perdido</span>
+                    {% endif %}
+                </td>
+                <td style="padding: 9px 14px; word-break: break-word;">
+                    {% if emp.observacao %}
+                    <small class="text-secondary">{{ emp.observacao|truncatechars:35 }}</small>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Tom Select CSS & JS (para busca inteligente com lista nos filtros) -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+<!-- Biblioteca html2pdf.js via CDN oficial -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+    // Inicialização do TomSelect no filtro de Colaborador (com busca por nome e matrícula)
+    new TomSelect("#filtro-colaborador", {
+        create: false,
+        placeholder: "Todos os colaboradores...",
+        sortField: { field: "text", direction: "asc" },
+        render: {
+            no_results: function () {
+                return '<div class="no-results">Nenhum resultado encontrado</div>';
+            }
+        },
+        score: function (search) {
+            search = search.toLowerCase().trim();
+            if (!search) return function () { return 0; };
+
+            const searchSemF = search.startsWith('f') ? search.slice(1) : search;
+            const searchComF = search.startsWith('f') ? search : 'f' + search;
+            const apenasNumeros = searchSemF.replace(/^0+/, '');
+
+            return function (item) {
+                const text = String(item.text || '').toLowerCase();
+                if (text.includes(search) || text.includes(searchSemF) || text.includes(searchComF)) {
+                    return 1;
+                }
+                if (apenasNumeros && text.includes(apenasNumeros)) {
+                    return 1;
+                }
+                return 0;
+            };
+        }
+    });
+
+    // Inicialização do TomSelect no filtro de Equipamento (com busca por nome e CA)
+    new TomSelect("#filtro-equipamento", {
+        create: false,
+        placeholder: "Todos os equipamentos...",
+        sortField: { field: "text", direction: "asc" },
+        render: {
+            no_results: function () {
+                return '<div class="no-results">Nenhum resultado encontrado</div>';
+            }
+        }
+    });
+
+    // Função de Geração e Download do Relatório em PDF
+    function gerarPDFRelatorio() {
+        const elemento = document.getElementById('area-relatorio-pdf');
+        const botao = document.getElementById('btnSalvarPDF');
+
+        // 1. Torna o elemento visível temporariamente para o html2canvas capturar com coordenadas válidas
+        elemento.style.display = 'block';
+
+        // Formata data atual para o nome do arquivo
+        const dataHoje = new Date();
+        const ano = dataHoje.getFullYear();
+        const mes = String(dataHoje.getMonth() + 1).padStart(2, '0');
+        const dia = String(dataHoje.getDate()).padStart(2, '0');
+        const nomeArquivo = `Relatorio_Controle_EPI_${ano}-${mes}-${dia}.pdf`;
+
+        // Feedback visual no botão
+        const conteudoOriginal = botao.innerHTML;
+        botao.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Gerando...';
+        botao.disabled = true;
+
+        // Configuração do PDF (A4 Paisagem para caber todas as colunas com folga)
+        const opcoes = {
+            margin: [8, 8, 8, 8],
+            filename: nomeArquivo,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        // Gera e baixa o arquivo PDF
+        html2pdf().set(opcoes).from(elemento).save().then(function () {
+            // 2. Oculta de volta após a conclusão do download
+            elemento.style.display = 'none';
+            botao.innerHTML = conteudoOriginal;
+            botao.disabled = false;
+        }).catch(function (error) {
+            console.error('Erro ao gerar PDF:', error);
+            elemento.style.display = 'none';
+            botao.innerHTML = conteudoOriginal;
+            botao.disabled = false;
+        });
+    }
+</script>
+{% endblock %}

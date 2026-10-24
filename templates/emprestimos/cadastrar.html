@@ -116,6 +116,11 @@
         create: false,
         placeholder: "Digite o nome ou matrícula...",
         sortField: { field: "text", direction: "asc" },
+        render: {
+            no_results: function (data, escape) {
+                return '<div class="no-results">Nenhum resultado encontrado</div>';
+            }
+        },
         score: function (search) {
             search = search.toLowerCase().trim();
             if (!search) return function () { return 0; };
@@ -125,7 +130,7 @@
             const apenasNumeros = searchSemF.replace(/^0+/, ''); // Remove zeros à esquerda (ex: 42)
 
             return function (item) {
-                const text = item.text.toLowerCase();
+                const text = String(item.text || '').toLowerCase();
                 // 1. Busca direta pelo texto (nome ou matrícula completa)
                 if (text.includes(search) || text.includes(searchSemF) || text.includes(searchComF)) {
                     return 1;
@@ -146,6 +151,11 @@
         create: false,
         placeholder: "Digite o nome ou nº do CA...",
         sortField: { field: "text", direction: "asc" },
+        render: {
+            no_results: function (data, escape) {
+                return '<div class="no-results">Nenhum resultado encontrado</div>';
+            }
+        }
     });
     if (!tsEquipamento.getValue()) {
         tsEquipamento.clear(true);

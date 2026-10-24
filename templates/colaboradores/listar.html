@@ -15,6 +15,10 @@
             <!-- Barra de Pesquisa por Nome -->
             <div class="col-12 col-md-5">
                 <form method="GET" class="d-flex gap-2">
+                    <!-- Preserva ordenação ao buscar -->
+                    <input type="hidden" name="campo" value="{{ campo_ordenacao }}">
+                    <input type="hidden" name="direcao" value="{{ direcao_ordenacao }}">
+
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
                         <input type="text" name="busca" class="form-control"
@@ -44,12 +48,116 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">Nome</th>
-                        <th>Matrícula</th>
-                        <th>CPF</th>
-                        <th>Função</th>
-                        <th>Telefone</th>
-                        <th>Status</th>
+                        <!-- 1. Nome -->
+                        <th class="ps-4">
+                            <a href="?busca={{ termo_busca }}&campo=nome&direcao={% if campo_ordenacao == 'nome' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Nome">
+                                <span>Nome</span>
+                                {% if campo_ordenacao == 'nome' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente (A-Z)"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente (Z-A)"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 2. Matrícula -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=matricula&direcao={% if campo_ordenacao == 'matricula' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Matrícula">
+                                <span>Matrícula</span>
+                                {% if campo_ordenacao == 'matricula' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 3. CPF -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=cpf&direcao={% if campo_ordenacao == 'cpf' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por CPF">
+                                <span>CPF</span>
+                                {% if campo_ordenacao == 'cpf' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 4. Função -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=funcao&direcao={% if campo_ordenacao == 'funcao' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Função">
+                                <span>Função</span>
+                                {% if campo_ordenacao == 'funcao' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente (A-Z)"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente (Z-A)"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 5. Telefone -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=telefone&direcao={% if campo_ordenacao == 'telefone' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Telefone">
+                                <span>Telefone</span>
+                                {% if campo_ordenacao == 'telefone' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 6. Status -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=status&direcao={% if campo_ordenacao == 'status' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Status">
+                                <span>Status</span>
+                                {% if campo_ordenacao == 'status' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente (Ativo primeiro)"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold"
+                                    title="Decrescente (Inativo primeiro)"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 7. Ação (sem ordenação) -->
                         <th class="text-end pe-4">Ação</th>
                     </tr>
                 </thead>

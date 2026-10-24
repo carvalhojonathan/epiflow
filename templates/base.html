@@ -91,13 +91,26 @@
                 <li class="sidebar-category">Controle</li>
                 <li>
                     <a href="{% url 'emprestimos:listar' %}"
-                        class="sidebar-link {% if request.resolver_match.app_name == 'emprestimos' %}active{% endif %}"
+                        class="sidebar-link {% if request.resolver_match.app_name == 'emprestimos' and request.resolver_match.url_name != 'relatorios' %}active{% endif %}"
                         title="Controle de EPI">
                         <i class="bi bi-clipboard-check"></i>
                         <span class="link-text">Controle de EPI</span>
                     </a>
                 </li>
+
+                <!-- Categoria Relatórios (Conforme Wireframe e Especificação) -->
+                <li class="sidebar-category">Relatórios</li>
+                <li>
+                    <a href="{% url 'emprestimos:relatorios' %}"
+                        class="sidebar-link {% if request.resolver_match.url_name == 'relatorios' %}active{% endif %}"
+                        title="Relatórios de Empréstimos">
+                        <i class="bi bi-file-earmark-bar-graph"></i>
+                        <span class="link-text">Empréstimos</span>
+                    </a>
+                </li>
             </ul>
+
+
         </aside>
 
         <!-- Área de Conteúdo à Direita -->

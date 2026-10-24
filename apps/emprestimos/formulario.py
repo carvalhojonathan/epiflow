@@ -6,8 +6,9 @@ from .models import Emprestimo
 class EmprestimoForm(forms.ModelForm):
     """
     Formulário de CRIAÇÃO de empréstimo/fornecimento.
-    - Status como campo select.
-    - Colaborador e Equipamento com ordenação alfabética.
+    - Valida saldo em estoque (bloqueia se saldo <= 0).
+    - Valida validade do CA (bloqueia se CA vencido).
+    - Exibe saldo atual, estoque mínimo e status do CA nas opções do select.
     """
     class Meta:
         model = Emprestimo
@@ -42,20 +43,35 @@ class EmprestimoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         hoje = timezone.now().date()
 
-        # Ordem alfabética
+        # Identificação amigável do Colaborador
         self.fields['colaborador'].label_from_instance = lambda obj: (
             f"{obj.nome} ({obj.matricula})"
             if obj.matricula
             else obj.nome
         )
-        self.fields['equipamento'].queryset = self.fields['equipamento'].queryset.order_by('nome')
+        
+        # Filtra apenas equipamentos ativos e ordenados por nome
+        self.fields['equipamento'].queryset = self.fields['equipamento'].queryset.filter(ativo=True).order_by('nome')
 
-        # Aviso visual de CA no Equipamento (sem bloquear o cadastro)
-        self.fields['equipamento'].label_from_instance = lambda obj: (
-            f"{obj.nome} (CA: {obj.ca_numero}) — ⚠️ CA Vencido em {obj.validade_ca.strftime('%d/%m/%Y')}"
-            if obj.validade_ca and obj.validade_ca < hoje
-            else f"{obj.nome} (CA: {obj.ca_numero})"
-        )
+        # Exibição rica do Equipamento com Saldo, Estoque Mínimo e Validade do CA
+        def rotulo_equipamento(obj):
+            partes = [f"{obj.nome} (CA: {obj.ca_numero})"]
+
+            # Alerta de CA vencido
+            if obj.validade_ca and obj.validade_ca < hoje:
+                partes.append(f"⚠️ CA Vencido em {obj.validade_ca.strftime('%d/%m/%Y')}")
+
+            # Alerta de Estoque
+            if obj.saldo_estoque <= 0:
+                partes.append("⚠️ Sem Estoque (0 un.)")
+            elif obj.saldo_estoque <= obj.estoque_minimo:
+                partes.append(f"⚠️ Estoque Baixo (Restam {obj.saldo_estoque} | Mínimo: {obj.estoque_minimo})")
+            else:
+                partes.append(f"Saldo: {obj.saldo_estoque} un.")
+
+            return " — ".join(partes)
+
+        self.fields['equipamento'].label_from_instance = rotulo_equipamento
 
         self.fields['colaborador'].empty_label = ""
         self.fields['equipamento'].empty_label = ""
@@ -74,13 +90,31 @@ class EmprestimoForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        equipamento = cleaned_data.get('equipamento')
         status = cleaned_data.get('status')
         data_prevista = cleaned_data.get('data_devolucao_prevista')
+        hoje = timezone.now().date()
 
+        # 1. Validação de CA do Equipamento
+        if equipamento and equipamento.validade_ca and equipamento.validade_ca < hoje:
+            self.add_error(
+                'equipamento',
+                f"Não é permitido realizar empréstimo/fornecimento de EPI com CA vencido. "
+                f"O CA nº {equipamento.ca_numero} venceu em {equipamento.validade_ca.strftime('%d/%m/%Y')}."
+            )
+
+        # 2. Validação de Saldo de Estoque (bloqueia apenas se estoque físico for zero)
+        if equipamento and equipamento.saldo_estoque <= 0:
+            self.add_error(
+                'equipamento',
+                f"Saldo insuficiente no estoque! O equipamento '{equipamento.nome}' possui saldo atual de 0 unidades."
+            )
+
+        # 3. Validação de Data Prevista para Itens Emprestados
         if status == 'Emprestado':
             if not data_prevista:
                 self.add_error('data_devolucao_prevista', 'Informe a data prevista de devolução para itens emprestados.')
-            elif data_prevista <= timezone.now().date():
+            elif data_prevista <= hoje:
                 self.add_error('data_devolucao_prevista', 'A data prevista para devolução deve ser posterior à data atual.')
         elif status == 'Fornecido':
             cleaned_data['data_devolucao_prevista'] = None

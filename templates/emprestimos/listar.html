@@ -15,6 +15,10 @@
             <!-- Busca -->
             <div class="col-12 col-md-5">
                 <form method="GET" class="d-flex gap-2">
+                    <!-- Preserva ordenação atual durante a busca -->
+                    <input type="hidden" name="campo" value="{{ campo_ordenacao }}">
+                    <input type="hidden" name="direcao" value="{{ direcao_ordenacao }}">
+
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
                         <input type="text" name="busca" class="form-control"
@@ -22,7 +26,8 @@
                     </div>
                     <button type="submit" class="btn btn-outline-secondary">Buscar</button>
                     {% if termo_busca %}
-                    <a href="{% url 'emprestimos:listar' %}" class="btn btn-outline-danger" title="Limpar busca">
+                    <a href="{% url 'emprestimos:listar' %}?campo={{ campo_ordenacao }}&direcao={{ direcao_ordenacao }}"
+                        class="btn btn-outline-danger" title="Limpar busca">
                         <i class="bi bi-x-lg"></i>
                     </a>
                     {% endif %}
@@ -44,20 +49,145 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">Colaborador</th>
-                        <th>Equipamento</th>
-                        <th>Data Empréstimo</th>
-                        <th>Devolução Prevista</th>
-                        <th>Devolução Real</th>
-                        <th>Status</th>
+                        <!-- 1. Colaborador -->
+                        <th class="ps-4">
+                            <a href="?busca={{ termo_busca }}&campo=colaborador&direcao={% if campo_ordenacao == 'colaborador' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Colaborador">
+                                <span>Colaborador</span>
+                                {% if campo_ordenacao == 'colaborador' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente (A-Z)"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente (Z-A)"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 2. Equipamento -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=equipamento&direcao={% if campo_ordenacao == 'equipamento' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Equipamento">
+                                <span>Equipamento</span>
+                                {% if campo_ordenacao == 'equipamento' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente (A-Z)"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente (Z-A)"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 3. Data Empréstimo -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=data_emprestimo&direcao={% if campo_ordenacao == 'data_emprestimo' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Data de Empréstimo">
+                                <span>Data Empréstimo</span>
+                                {% if campo_ordenacao == 'data_emprestimo' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Mais antigos primeiro"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Mais recentes primeiro"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 4. Devolução Prevista -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=devolucao_prevista&direcao={% if campo_ordenacao == 'devolucao_prevista' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Devolução Prevista">
+                                <span>Devolução Prevista</span>
+                                {% if campo_ordenacao == 'devolucao_prevista' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Mais antigas primeiro"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Mais recentes primeiro"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 5. Devolução Real -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=devolucao_real&direcao={% if campo_ordenacao == 'devolucao_real' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Devolução Real">
+                                <span>Devolução Real</span>
+                                {% if campo_ordenacao == 'devolucao_real' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Mais antigos primeiro"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Mais recentes primeiro"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 6. Status -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=status&direcao={% if campo_ordenacao == 'status' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Status">
+                                <span>Status</span>
+                                {% if campo_ordenacao == 'status' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente (A-Z)"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente (Z-A)"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 7. Ação (Sem setinha) -->
                         <th class="text-end pe-4">Ação</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for emp in emprestimos %}
                     <tr>
-                        <td class="ps-4 fw-semibold text-dark">{{ emp.colaborador.nome }}</td>
-                        <td>{{ emp.equipamento.nome }}</td>
+                        <td class="ps-4">
+                            <div class="fw-semibold text-dark">{{ emp.colaborador.nome }}</div>
+                            {% if emp.colaborador.matricula %}
+                            <span class="badge bg-light text-secondary border">
+                                {{ emp.colaborador.matricula }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark">{{ emp.equipamento.nome }}</div>
+                            {% if emp.equipamento.ca_numero %}
+                            <span class="badge bg-light text-secondary border">
+                                {{ emp.equipamento.ca_numero }}
+                            </span>
+                            {% endif %}
+
+                            <!-- ALERTA DE CA VENCIDO DURANTE O USO -->
+                            {% if emp.ca_vencido_em_uso %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1"
+                                title="O CA deste EPI venceu em {{ emp.equipamento.validade_ca|date:'d/m/Y' }} durante o uso">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>CA Vencido
+                            </span>
+                            {% endif %}
+                        </td>
                         <td>{{ emp.data_emprestimo|date:"d/m/Y" }}</td>
                         <td>
                             {% if emp.data_devolucao_prevista %}

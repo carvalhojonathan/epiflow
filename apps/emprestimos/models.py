@@ -2,7 +2,6 @@ from django.db import models
 from apps.colaboradores.models import Colaborador
 from apps.epis.models import Equipamento
 
-# Create your models here.
 
 class Emprestimo(models.Model):
     STATUS_CHOICES = [
@@ -55,3 +54,14 @@ class Emprestimo(models.Model):
 
     def __str__(self):
         return f'{self.colaborador.nome} — {self.equipamento.nome} ({self.status})'
+
+    @property
+    def ca_vencido_em_uso(self):
+        """
+        Retorna True se o empréstimo estiver com status 'Emprestado'
+        e a data de validade do CA do equipamento já tiver expirado.
+        """
+        from django.utils import timezone
+        if self.status == 'Emprestado' and self.equipamento and self.equipamento.validade_ca:
+            return self.equipamento.validade_ca < timezone.now().date()
+        return False

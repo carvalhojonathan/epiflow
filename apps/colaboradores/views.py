@@ -1,9 +1,46 @@
+import unicodedata
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.db.models import Q
 from .models import Colaborador
 from .formulario import ColaboradorForm
-import re
-from django.db.models import Q
+
+
+def remover_acentos(texto):
+    """
+    Remove acentos e converte para minúsculas para ordenação insensível a acentuação.
+    """
+    if not texto:
+        return ''
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', str(texto))
+        if unicodedata.category(c) != 'Mn'
+    ).lower()
+
+
+def aplicar_ordenacao_colaboradores(colaboradores, campo, direcao):
+    """
+    Ordena a lista de colaboradores com base no campo e direção ('asc' ou 'desc').
+    Campos suportados: nome, matricula, cpf, funcao, telefone, status.
+    """
+    reverse = (direcao == 'desc')
+
+    if campo == 'nome':
+        return sorted(colaboradores, key=lambda x: remover_acentos(x.nome), reverse=reverse)
+    elif campo == 'matricula':
+        return sorted(colaboradores, key=lambda x: (x.matricula or '').lower(), reverse=reverse)
+    elif campo == 'cpf':
+        return sorted(colaboradores, key=lambda x: (x.cpf or ''), reverse=reverse)
+    elif campo == 'funcao':
+        return sorted(colaboradores, key=lambda x: remover_acentos(x.funcao or ''), reverse=reverse)
+    elif campo == 'telefone':
+        return sorted(colaboradores, key=lambda x: (x.telefone or ''), reverse=reverse)
+    elif campo == 'status':
+        # Ordenação alfabética: 'Ativo' vem antes de 'Inativo'
+        return sorted(colaboradores, key=lambda x: 'Ativo' if x.ativo else 'Inativo', reverse=reverse)
+    else:
+        # Padrão: Nome em ordem alfabética crescente
+        return sorted(colaboradores, key=lambda x: remover_acentos(x.nome), reverse=False)
 
 
 def cadastrar_colaborador(request):
@@ -16,10 +53,8 @@ def cadastrar_colaborador(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Usuário cadastrado com sucesso!')
-            # Permanece na tela de cadastro (com o form limpo)
             return redirect('colaboradores:cadastrar')
         else:
-            # Pega o primeiro erro detalhado gerado pelo formulário
             primeiro_campo = list(form.errors.keys())[0] if form.errors else ''
             msg_erro = form.errors[primeiro_campo][0] if primeiro_campo in form.errors else 'Verifique os campos preenchidos.'
             messages.error(request, f'Usuário não foi cadastrado! {msg_erro}')
@@ -35,9 +70,12 @@ def cadastrar_colaborador(request):
 
 def listar_colaboradores(request):
     """
-    Lista colaboradores com suporte a pesquisa inteligente por nome, CPF ou matrícula.
+    Lista colaboradores com suporte a pesquisa inteligente por nome, CPF ou matrícula
+    e ordenação dinâmica pelas colunas (asc/desc).
     """
     termo_busca = request.GET.get('busca', '').strip()
+    campo_ordenacao = request.GET.get('campo', 'nome')
+    direcao_ordenacao = request.GET.get('direcao', 'asc')
 
     if termo_busca:
         termo_upper = termo_busca.upper()
@@ -58,15 +96,19 @@ def listar_colaboradores(request):
         else:
             filtro = Q(nome__icontains=termo_busca) | Q(cpf__icontains=termo_busca)
 
-        colaboradores = Colaborador.objects.filter(filtro).distinct().order_by('-id')
+        colaboradores = list(Colaborador.objects.filter(filtro).distinct())
     else:
-        colaboradores = Colaborador.objects.all().order_by('-id')
+        colaboradores = list(Colaborador.objects.all())
+
+    # Aplica ordenação dinâmica
+    colaboradores = aplicar_ordenacao_colaboradores(colaboradores, campo_ordenacao, direcao_ordenacao)
 
     return render(request, 'colaboradores/listar.html', {
         'colaboradores': colaboradores,
         'termo_busca': termo_busca,
+        'campo_ordenacao': campo_ordenacao,
+        'direcao_ordenacao': direcao_ordenacao,
     })
-
 
 
 def editar_colaborador(request, id):
@@ -109,7 +151,6 @@ def excluir_colaborador(request, id):
         messages.success(request, f'Colaborador {nome} removido com sucesso!')
         return redirect('colaboradores:listar')
 
-    # Caso alguém tente acessar direto por GET, volta pra lista
     return redirect('colaboradores:listar')
 
 

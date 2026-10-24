@@ -222,3 +222,44 @@ body {
     background-color: var(--primary-dark);
     color: white;
 }
+
+/* Botão Salvar Relatório (Fundo Claro -> Hover Teal) */
+.btn-salvar-relatorio {
+    background-color: #f8fafc;
+    color: var(--primary-teal);
+    border: 1px solid #cbd5e1;
+    font-weight: 600;
+    transition: all 0.25s ease-in-out;
+}
+
+.btn-salvar-relatorio i {
+    color: var(--primary-teal);
+    transition: color 0.25s ease-in-out;
+}
+
+.btn-salvar-relatorio:hover,
+.btn-salvar-relatorio:focus {
+    background-color: var(--primary-teal) !important;
+    color: #ffffff !important;
+    border-color: var(--primary-teal) !important;
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25) !important;
+}
+
+.btn-salvar-relatorio:hover i,
+.btn-salvar-relatorio:focus i {
+    color: #ffffff !important;
+}
+
+/* Cabeçalho da Tabela de Relatórios (Compatível com html2pdf e Bootstrap) */
+#tabela-relatorio thead th {
+    background-color: var(--primary-teal) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    border-bottom: 2px solid var(--primary-dark) !important;
+    vertical-align: middle;
+}
+
+#tabela-relatorio thead th a {
+    color: #ffffff !important;
+    text-decoration: none;
+}

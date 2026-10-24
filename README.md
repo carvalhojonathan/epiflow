@@ -1,27 +1,29 @@
 # 🛡️ EPI Flow — Sistema de Gestão de EPIs
 
-Sistema web para gestão e controle de entrega/empréstimo de Equipamentos de Proteção Individual (EPIs), desenvolvido em Python e Django.
+Sistema web para controle de entrega, empréstimo e conformidade de Equipamentos de Proteção Individual (EPIs), desenvolvido em Python e Django.
 
 ---
 
-## 🚀 Principais Módulos
+## 🚀 Principais Funcionalidades
 
-- **👥 Colaboradores:** Cadastro de colaboradores com validação de dados, busca inteligente e inativação/exclusão com modal de confirmação.
-- **🪖 Equipamentos (EPIs):** Cadastro de EPIs com número e validade de CA, estoque mínimo, validação de dados e busca inteligente.
-- **📋 Controle de EPI:** Registro de empréstimos e fornecimentos com busca por colaborador e EPI, atualização de status, alerta visual de CA vencido e dados dinâmicos de baixa (devolvido, danificado, perdido).
-
----
-
-## 📌 Status
-
-- ⚠️ **Integração com Estoque:** O registro de empréstimos/fornecimentos ainda não realiza baixa automática no saldo de estoque dos equipamentos.
-- 📊 **Relatórios e Autenticação:** As telas de relatórios gerenciais e login de usuários serão desenvolvidas em atualizações futuras.
+- **👥 Colaboradores:** Gestão de funcionários com validação de CPF, busca inteligente, inativação e ordenação por colunas.
+- **🪖 Equipamentos (EPIs):** Cadastro de EPIs com número de CA, data de validade, saldo em estoque e estoque mínimo. Alertas visuais automáticos para estoque crítico/esgotado e CA vencido.
+- **📋 Controle de EPI (Empréstimos e Fornecimentos):**
+  - **Integração com Estoque:** Baixa automática do saldo ao emprestar e retorno ao estoque ao registrar devolução.
+  - **Ponto de Reposição:** Avisos de estoque mínimo para reposição sem interromper a proteção do colaborador.
+  - **Validação de CA:** Bloqueio de novos empréstimos com CA vencido e alerta visual (`⚠️ CA Vencido`) caso o CA expire durante o uso.
+- **📊 Relatório Gerencial & Exportação em PDF:**
+  - Filtros cumulativos (AND) por Colaborador, Equipamento e Status com busca inteligente.
+  - Exportação direta em PDF no padrão A4 paisagem.
+- **↕️ Ordenação Dinâmica:** Ordenação em todas as tabelas do sistema, preservando as pesquisas ativas.
 
 ---
 
 ## 🛠️ Tecnologias
 
-Python 3.13 | Django 6.1 | SQLite3 | Bootstrap 5 | Tom Select
+- **Backend:** Python 3.13 | Django 6.1 | SQLite3
+- **Frontend:** Bootstrap 5 | Bootstrap Icons | FontAwesome
+- **Bibliotecas:** Tom Select (busca inteligente em selects) | html2pdf.js (geração de PDF)
 
 ---
 
@@ -36,7 +38,7 @@ cd epiflow
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1  # Windows (Linux/Mac: source .venv/bin/activate)
 
-# 3. Instale dependências e aplique migrações
+# 3. Instale as dependências e aplique as migrações
 pip install -r requirements.txt
 python manage.py migrate
 

@@ -15,4 +15,7 @@ urlpatterns = [
 
     # Exclusão do empréstimo -> /emprestimos/1/excluir/
     path('<int:id>/excluir/', views.excluir_emprestimo, name='excluir'),
+
+    # Relatórios -> /emprestimos/relatorios/
+    path('relatorios/', views.relatorio_emprestimos, name='relatorios'),
 ]

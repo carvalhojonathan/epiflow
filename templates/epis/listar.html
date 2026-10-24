@@ -15,6 +15,10 @@
             <!-- Barra de Pesquisa -->
             <div class="col-12 col-md-5">
                 <form method="GET" class="d-flex gap-2">
+                    <!-- Preserva ordenação ao buscar -->
+                    <input type="hidden" name="campo" value="{{ campo_ordenacao }}">
+                    <input type="hidden" name="direcao" value="{{ direcao_ordenacao }}">
+
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
                         <input type="text" name="busca" class="form-control"
@@ -44,12 +48,118 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">Nome</th>
-                        <th>Nº CA</th>
-                        <th>Validade CA</th>
-                        <th>Saldo Estoque</th>
-                        <th>Estoque Mínimo</th>
-                        <th>Status</th>
+                        <!-- 1. Nome -->
+                        <th class="ps-4">
+                            <a href="?busca={{ termo_busca }}&campo=nome&direcao={% if campo_ordenacao == 'nome' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Nome">
+                                <span>Nome</span>
+                                {% if campo_ordenacao == 'nome' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente (A-Z)"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente (Z-A)"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 2. Nº CA -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=ca_numero&direcao={% if campo_ordenacao == 'ca_numero' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Nº CA">
+                                <span>Nº CA</span>
+                                {% if campo_ordenacao == 'ca_numero' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Decrescente"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 3. Validade CA -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=validade_ca&direcao={% if campo_ordenacao == 'validade_ca' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Validade CA">
+                                <span>Validade CA</span>
+                                {% if campo_ordenacao == 'validade_ca' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Mais antigas primeiro"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Mais recentes primeiro"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 4. Saldo Estoque -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=saldo_estoque&direcao={% if campo_ordenacao == 'saldo_estoque' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Saldo Estoque">
+                                <span>Saldo Estoque</span>
+                                {% if campo_ordenacao == 'saldo_estoque' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Menor saldo primeiro"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold" title="Maior saldo primeiro"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 5. Estoque Mínimo -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=estoque_minimo&direcao={% if campo_ordenacao == 'estoque_minimo' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Estoque Mínimo">
+                                <span>Estoque Mínimo</span>
+                                {% if campo_ordenacao == 'estoque_minimo' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold"
+                                    title="Menor estoque mínimo primeiro"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold"
+                                    title="Maior estoque mínimo primeiro"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 6. Status -->
+                        <th>
+                            <a href="?busca={{ termo_busca }}&campo=status&direcao={% if campo_ordenacao == 'status' and direcao_ordenacao == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="text-dark text-decoration-none d-inline-flex align-items-center gap-1"
+                                title="Clique para ordenar por Status">
+                                <span>Status</span>
+                                {% if campo_ordenacao == 'status' %}
+                                {% if direcao_ordenacao == 'asc' %}
+                                <i class="bi bi-arrow-up text-primary fw-bold" title="Crescente (Ativo primeiro)"></i>
+                                {% else %}
+                                <i class="bi bi-arrow-down text-primary fw-bold"
+                                    title="Decrescente (Inativo primeiro)"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="bi bi-arrow-down-up text-muted opacity-25 small"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <!-- 7. Ação (sem ordenação) -->
                         <th class="text-end pe-4">Ação</th>
                     </tr>
                 </thead>
@@ -58,9 +168,37 @@
                     <tr class="{% if not equip.ativo %}table-light opacity-75{% endif %}">
                         <td class="ps-4 fw-semibold text-dark">{{ equip.nome }}</td>
                         <td><span class="badge bg-light text-dark border">{{ equip.ca_numero }}</span></td>
-                        <td>{{ equip.validade_ca|date:"d/m/Y" }}</td>
-                        <td>{{ equip.saldo_estoque }}</td>
-                        <td>{{ equip.estoque_minimo }}</td>
+                        <td>
+                            {{ equip.validade_ca|date:"d/m/Y" }}
+                            {% if equip.ca_vencido %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1"
+                                title="Certificado de Aprovação Vencido">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>Vencido
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if equip.saldo_estoque <= 0 %} <span
+                                class="badge bg-danger-subtle text-danger border border-danger-subtle fw-semibold"
+                                title="Estoque esgotado!">
+                                <i class="bi bi-x-circle me-1"></i>0 (Esgotado)
+                                </span>
+                                {% elif equip.saldo_estoque <= equip.estoque_minimo %} <span
+                                    class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle fw-semibold"
+                                    title="Saldo atingiu o estoque mínimo de reposição!">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ equip.saldo_estoque }}
+                                    (Abaixo do Mínimo)
+                                    </span>
+                                    {% else %}
+                                    <span
+                                        class="badge bg-success-subtle text-success border border-success-subtle fw-semibold">
+                                        {{ equip.saldo_estoque }} un.
+                                    </span>
+                                    {% endif %}
+                        </td>
+                        <td>
+                            <span class="text-secondary fw-semibold">{{ equip.estoque_minimo }} un.</span>
+                        </td>
                         <td>
                             {% if equip.ativo %}
                             <span class="badge bg-success-subtle text-success border border-success-subtle">Ativo</span>
