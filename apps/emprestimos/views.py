@@ -70,6 +70,10 @@ def cadastrar_emprestimo(request):
     - Se for válido, subtrai 1 unidade do saldo de estoque do equipamento.
     - Permanece na tela de cadastro limpa após salvar com sucesso.
     """
+    if not request.user.has_perm('emprestimos.add_emprestimo'):
+        messages.error(request, 'Acesso negado: seu perfil não tem permissão para registrar empréstimos.')
+        return redirect('emprestimos:listar')
+
     if request.method == 'POST':
         form = EmprestimoForm(request.POST)
         if form.is_valid():
@@ -140,6 +144,10 @@ def editar_emprestimo(request, id):
     - Se o status mudar para 'Devolvido', o equipamento retorna ao estoque (+1).
     - Se o status era 'Devolvido' e for revertido para outro status, sai do estoque (-1).
     """
+    if not request.user.has_perm('emprestimos.change_emprestimo'):
+        messages.error(request, 'Acesso negado: seu perfil não tem permissão para editar empréstimos.')
+        return redirect('emprestimos:listar')
+
     emprestimo = get_object_or_404(Emprestimo, id=id)
     status_anterior = emprestimo.status
 
@@ -182,6 +190,10 @@ def excluir_emprestimo(request, id):
     Exclui um registro de empréstimo após confirmação.
     Se o registro estava em aberto (Emprestado ou Fornecido), estorna a unidade de volta ao estoque.
     """
+    if not request.user.has_perm('emprestimos.delete_emprestimo'):
+        messages.error(request, 'Acesso negado: seu perfil não tem permissão para excluir empréstimos.')
+        return redirect('emprestimos:listar')
+    
     emprestimo = get_object_or_404(Emprestimo, id=id)
     if request.method == 'POST':
         descricao = f"{emprestimo.equipamento.nome} para {emprestimo.colaborador.nome}"

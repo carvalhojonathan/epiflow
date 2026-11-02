@@ -35,11 +35,13 @@
             </div>
 
             <!-- Botão REGISTRAR -->
+            {% if perms.emprestimos.add_emprestimo %}
             <div class="col-12 col-md-3 text-md-end">
                 <a href="{% url 'emprestimos:cadastrar' %}" class="btn btn-custom fw-bold shadow-sm">
                     <i class="bi bi-plus-lg me-1"></i>REGISTRAR
                 </a>
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -157,8 +159,10 @@
                             </a>
                         </th>
 
-                        <!-- 7. Ação (Sem setinha) -->
+                        <!-- 7. Ação (só aparece se puder editar ou excluir) -->
+                        {% if perms.emprestimos.change_emprestimo or perms.emprestimos.delete_emprestimo %}
                         <th class="text-end pe-4">Ação</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -218,19 +222,26 @@
                             <span class="badge bg-dark text-white">Perdido</span>
                             {% endif %}
                         </td>
+                        {% if perms.emprestimos.change_emprestimo or perms.emprestimos.delete_emprestimo %}
                         <td class="text-end pe-4">
-                            <!-- Botão Editar -->
+                            <!-- Botão Atualizar -->
+                            {% if perms.emprestimos.change_emprestimo %}
                             <a href="{% url 'emprestimos:editar' emp.id %}" class="btn btn-sm btn-outline-primary me-1">
-                                <i class="bi bi-pencil-square me-1"></i>Atualizar Status
+                                <i class="bi bi-arrow-clockwise me-1"></i>Atualizar
                             </a>
+                            {% endif %}
 
                             <!-- Botão Deletar (Abre Modal) -->
+                            {% if perms.emprestimos.delete_emprestimo %}
                             <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
                                 data-bs-target="#modalExcluir" data-emp-id="{{ emp.id }}"
-                                data-emp-desc="{{ emp.equipamento.nome }} para {{ emp.colaborador.nome }}">
-                                <i class="bi bi-trash me-1"></i>Deletar
+                                data-emp-desc="{{ emp.equipamento.nome }} para {{ emp.colaborador.nome }}"
+                                title="Excluir Registro">
+                                <i class="bi bi-trash"></i>
                             </button>
+                            {% endif %}
                         </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>

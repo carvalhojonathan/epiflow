@@ -34,11 +34,13 @@
             </div>
 
             <!-- Botão CRIAR -->
+            {% if perms.epis.add_equipamento %}
             <div class="col-12 col-md-3 text-md-end">
                 <a href="{% url 'epis:cadastrar' %}" class="btn btn-custom fw-bold shadow-sm">
                     <i class="bi bi-plus-lg me-1"></i>CRIAR
                 </a>
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -159,8 +161,10 @@
                             </a>
                         </th>
 
-                        <!-- 7. Ação (sem ordenação) -->
+                        <!-- 7. Ação (só aparece se puder editar ou excluir) -->
+                        {% if perms.epis.change_equipamento or perms.epis.delete_equipamento %}
                         <th class="text-end pe-4">Ação</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -207,8 +211,10 @@
                                 class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inativo</span>
                             {% endif %}
                         </td>
+                        {% if perms.epis.change_equipamento or perms.epis.delete_equipamento %}
                         <td class="text-end pe-4">
                             <!-- Botão de Inativar / Ativar -->
+                            {% if perms.epis.change_equipamento %}
                             <a href="{% url 'epis:alternar_status' equip.id %}"
                                 class="btn btn-sm {% if equip.ativo %}btn-outline-warning text-dark{% else %}btn-outline-success{% endif %} me-1"
                                 title="{% if equip.ativo %}Inativar Equipamento{% else %}Ativar Equipamento{% endif %}">
@@ -216,19 +222,25 @@
                                     class="bi {% if equip.ativo %}bi-x-circle{% else %}bi-check-circle{% endif %} me-1"></i>
                                 {% if equip.ativo %}Inativar{% else %}Ativar{% endif %}
                             </a>
+                            {% endif %}
 
                             <!-- Botão de Editar -->
+                            {% if perms.epis.change_equipamento %}
                             <a href="{% url 'epis:editar' equip.id %}" class="btn btn-sm btn-outline-primary me-1">
                                 <i class="bi bi-pencil-square me-1"></i>Editar
                             </a>
+                            {% endif %}
 
                             <!-- Botão de Deletar -->
+                            {% if perms.epis.delete_equipamento %}
                             <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
                                 data-bs-target="#modalExcluir" data-equip-id="{{ equip.id }}"
                                 data-equip-nome="{{ equip.nome }}">
-                                <i class="bi bi-trash me-1"></i>Deletar
+                                <i class="bi bi-trash"></i>
                             </button>
+                            {% endif %}
                         </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>

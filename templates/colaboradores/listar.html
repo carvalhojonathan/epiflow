@@ -34,11 +34,14 @@
             </div>
 
             <!-- Botão CRIAR -->
+            <!-- Botão CRIAR -->
+            {% if perms.colaboradores.add_colaborador %}
             <div class="col-12 col-md-3 text-md-end">
                 <a href="{% url 'colaboradores:cadastrar' %}" class="btn btn-custom fw-bold shadow-sm">
                     <i class="bi bi-plus-lg me-1"></i>CRIAR
                 </a>
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -158,7 +161,9 @@
                         </th>
 
                         <!-- 7. Ação (sem ordenação) -->
+                        {% if perms.colaboradores.change_colaborador or perms.colaboradores.delete_colaborador %}
                         <th class="text-end pe-4">Ação</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -177,8 +182,10 @@
                                 class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inativo</span>
                             {% endif %}
                         </td>
+                        {% if perms.colaboradores.change_colaborador or perms.colaboradores.delete_colaborador %}
                         <td class="text-end pe-4">
                             <!-- Botão de Inativar / Ativar -->
+                            {% if perms.colaboradores.change_colaborador %}
                             <a href="{% url 'colaboradores:alternar_status' colab.id %}"
                                 class="btn btn-sm {% if colab.ativo %}btn-outline-warning text-dark{% else %}btn-outline-success{% endif %} me-1"
                                 title="{% if colab.ativo %}Inativar Colaborador{% else %}Ativar Colaborador{% endif %}">
@@ -186,20 +193,26 @@
                                     class="bi {% if colab.ativo %}bi-person-slash{% else %}bi-person-check{% endif %} me-1"></i>
                                 {% if colab.ativo %}Inativar{% else %}Ativar{% endif %}
                             </a>
+                            {% endif %}
 
                             <!-- Botão de Editar -->
+                            {% if perms.colaboradores.change_colaborador %}
                             <a href="{% url 'colaboradores:editar' colab.id %}"
                                 class="btn btn-sm btn-outline-primary me-1">
                                 <i class="bi bi-pencil-square me-1"></i>Editar
                             </a>
+                            {% endif %}
 
                             <!-- Botão de Deletar -->
+                            {% if perms.colaboradores.delete_colaborador %}
                             <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
                                 data-bs-target="#modalExcluir" data-colab-id="{{ colab.id }}"
                                 data-colab-nome="{{ colab.nome }}">
-                                <i class="bi bi-trash me-1"></i>Deletar
+                                <i class="bi bi-trash "></i>
                             </button>
+                            {% endif %}
                         </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>

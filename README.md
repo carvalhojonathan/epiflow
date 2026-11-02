@@ -1,18 +1,19 @@
 # 🛡️ EPI Flow — Sistema de Gestão de EPIs
 
-Sistema web para controle de entrega, empréstimo e conformidade de Equipamentos de Proteção Individual (EPIs), desenvolvido em Python e Django.
+Sistema web para controle de entrega, empréstimo, estoque e conformidade de Equipamentos de Proteção Individual (EPIs), desenvolvido em Python e Django.
 
 ---
 
 ## 🚀 Principais Funcionalidades
 
+- **🔐 Autenticação e Controle de Acesso:** Login/logout com rotas protegidas e controle de permissões por grupos via Django Admin.
 - **👥 Colaboradores:** Gestão de funcionários com validação de CPF, busca inteligente, inativação e ordenação por colunas.
 - **🪖 Equipamentos (EPIs):** Cadastro de EPIs com número de CA, data de validade, saldo em estoque e estoque mínimo. Alertas visuais automáticos para estoque crítico/esgotado e CA vencido.
 - **📋 Controle de EPI (Empréstimos e Fornecimentos):**
   - **Integração com Estoque:** Baixa automática do saldo ao emprestar e retorno ao estoque ao registrar devolução.
   - **Ponto de Reposição:** Avisos de estoque mínimo para reposição sem interromper a proteção do colaborador.
   - **Validação de CA:** Bloqueio de novos empréstimos com CA vencido e alerta visual (`⚠️ CA Vencido`) caso o CA expire durante o uso.
-- **📊 Relatório Gerencial & Exportação em PDF:**
+- **📊 Relatório Gerencial e Exportação em PDF:**
   - Filtros cumulativos (AND) por Colaborador, Equipamento e Status com busca inteligente.
   - Exportação direta em PDF no padrão A4 paisagem.
 - **↕️ Ordenação Dinâmica:** Ordenação em todas as tabelas do sistema, preservando as pesquisas ativas.

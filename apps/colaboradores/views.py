@@ -48,6 +48,10 @@ def cadastrar_colaborador(request):
     Cadastra um novo colaborador.
     Após salvar, exibe mensagem de feedback e permanece na tela de cadastro.
     """
+    if not request.user.has_perm('colaboradores.add_colaborador'):
+        messages.error(request, 'Acesso negado: seu perfil não tem permissão para cadastrar colaboradores.')
+        return redirect('colaboradores:listar')
+
     if request.method == 'POST':
         form = ColaboradorForm(request.POST)
         if form.is_valid():
@@ -115,6 +119,10 @@ def editar_colaborador(request, id):
     """
     Edita um colaborador existente exibindo seus dados atuais nos campos.
     """
+    if not request.user.has_perm('colaboradores.change_colaborador'):
+        messages.error(request, 'Acesso negado: seu perfil não tem permissão para editar colaboradores.')
+        return redirect('colaboradores:listar')
+
     colaborador = get_object_or_404(Colaborador, id=id)
 
     if request.method == 'POST':
@@ -143,6 +151,10 @@ def excluir_colaborador(request, id):
     """
     Exclui o colaborador após a confirmação do alerta.
     """
+    if not request.user.has_perm('colaboradores.delete_colaborador'):
+        messages.error(request, 'Acesso negado: seu perfil não tem permissão para excluir colaboradores.')
+        return redirect('colaboradores:listar')
+    
     colaborador = get_object_or_404(Colaborador, id=id)
     
     if request.method == 'POST':
@@ -158,6 +170,10 @@ def alternar_status_colaborador(request, id):
     """
     Alterna o status do colaborador entre Ativo e Inativo.
     """
+    if not request.user.has_perm('colaboradores.change_colaborador'):
+        messages.error(request, 'Acesso negado: seu perfil não tem permissão para alterar o status de colaboradores.')
+        return redirect('colaboradores:listar')
+
     colaborador = get_object_or_404(Colaborador, id=id)
     colaborador.ativo = not colaborador.ativo
     colaborador.save()

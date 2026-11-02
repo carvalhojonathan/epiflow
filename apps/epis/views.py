@@ -11,6 +11,10 @@ def cadastrar_equipamento(request):
     Cadastra um novo equipamento/EPI.
     Após salvar com sucesso, exibe feedback e permanece na tela de cadastro com formulário limpo.
     """
+    if not request.user.has_perm('epis.add_equipamento'):
+        messages.error(request, 'Acesso negado: seu perfil não tem permissão para cadastrar equipamentos.')
+        return redirect('epis:listar')
+
     if request.method == 'POST':
         form = EquipamentoForm(request.POST)
         if form.is_valid():
@@ -121,6 +125,10 @@ def editar_equipamento(request, id):
     """
     Edita um equipamento existente, pré-carregando seus dados no formulário.
     """
+    if not request.user.has_perm('epis.change_equipamento'):
+        messages.error(request, 'Acesso negado: seu perfil não tem permissão para editar equipamentos.')
+        return redirect('epis:listar')
+
     equipamento = get_object_or_404(Equipamento, id=id)
 
     if request.method == 'POST':
@@ -147,6 +155,10 @@ def excluir_equipamento(request, id):
     """
     Exclui o equipamento após confirmação no modal.
     """
+    if not request.user.has_perm('epis.delete_equipamento'):
+        messages.error(request, 'Acesso negado: seu perfil não tem permissão para excluir equipamentos.')
+        return redirect('epis:listar')
+
     equipamento = get_object_or_404(Equipamento, id=id)
 
     if request.method == 'POST':
@@ -162,6 +174,10 @@ def alternar_status_equipamento(request, id):
     """
     Ativa ou inativa o equipamento rapidamente.
     """
+    if not request.user.has_perm('epis.change_equipamento'):
+        messages.error(request, 'Acesso negado: seu perfil não tem permissão para alterar o status do equipamento.')
+        return redirect('epis:listar')
+
     equipamento = get_object_or_404(Equipamento, id=id)
     equipamento.ativo = not equipamento.ativo
     equipamento.save()
